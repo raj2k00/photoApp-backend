@@ -66,7 +66,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     this.emailVerificationToken = undefined;
     this.emailVerificationTokenExpires = undefined;
     await user.save({ validateBeforeSave: false });
-    // console.log(error);
+    console.log(error);
     return next(
       new AppError(
         "There was an error sending password Verification Email. Please try again later",
