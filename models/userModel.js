@@ -72,7 +72,7 @@ userSchema.methods.createEmailVerificationToken = function () {
 
   this.emailVerificationTokenExpires = Date.now() + 30 * 60 * 1000; // Expire-Time 30 minutes after issuing
 
-  console.log(resetToken, this.emailVerificationToken);
+  // console.log(resetToken, this.emailVerificationToken);
   return resetToken;
 };
 

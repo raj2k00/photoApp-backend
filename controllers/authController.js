@@ -50,12 +50,11 @@ exports.signup = catchAsync(async (req, res, next) => {
   if (!user)
     return next(new AppError("There is no user with that email address", 404));
 
-  console.log(user);
-  console.log(newUser);
+  // console.log(user);
+  // console.log(newUser);
   const resetToken = user.createEmailVerificationToken();
-  const data = await user.save({ validateBeforeSave: false });
+  await user.save({ validateBeforeSave: false });
 
-  console.log("data", data);
   const resetUrl = `${req.protocol}://${req.get(
     "host"
   )}/api/v1/users/verifyEmail/${resetToken}`;
@@ -67,7 +66,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     this.emailVerificationToken = undefined;
     this.emailVerificationTokenExpires = undefined;
     await user.save({ validateBeforeSave: false });
-    console.log(error);
+    // console.log(error);
     return next(
       new AppError(
         "There was an error sending password Verification Email. Please try again later",
@@ -136,14 +135,14 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
     .update(req.params.token)
     .digest("hex");
 
-  console.log(hashedToken);
+  // console.log(hashedToken);
 
   const user = await User.findOne({
     emailVerificationToken: hashedToken,
     emailVerificationTokenExpires: { $gt: Date.now() },
   });
 
-  console.log(user);
+  // console.log(user);
 
   if (!user) return next(new AppError("Token is invalid or expired", 400));
   user.isVerfied = true;
