@@ -93,7 +93,7 @@ module.exports = (err, req, res, next) => {
     error.message = err.message;
     if (error.path === "_id") error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDublicateFieldsDB(error);
-    if (error._message === "Article validation failed")
+    if (error._message === "User validation failed")
       error = handleValidatonFieldDB();
     if (error.name === "JsonWebTokenError") error = handleInvalidSignature();
     if (error.name === "TokenExpiredError") error = handleTokenExpiredError();
