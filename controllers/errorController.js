@@ -6,7 +6,7 @@ const handleCastErrorDB = (err) => {
 };
 
 const handleDublicateFieldsDB = (err) => {
-  const message = `Article with name - ${err.keyValue.name} - already exists`;
+  const message = `Image with name - ${err.keyValue.name} - already exists`;
   return new AppError(message, 400);
 };
 const handleValidatonFieldDB = (err) => {
@@ -84,7 +84,7 @@ const sendProductionError = (err, req, res) => {
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
-
+  console.log(process.env.NODE_ENV);
   if (process.env.NODE_ENV === "development") {
     sendDevError(err, req, res);
   } else if (process.env.NODE_ENV === "production") {
@@ -94,11 +94,9 @@ module.exports = (err, req, res, next) => {
     if (error.path === "_id") error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDublicateFieldsDB(error);
     if (error._message === "Article validation failed")
-      error = handleValidatonFieldDB(error);
-    if (error.name === "JsonWebTokenError")
-      error = handleInvalidSignature(error);
-    if (error.name === "TokenExpiredError")
-      error = handleTokenExpiredError(error);
+      error = handleValidatonFieldDB();
+    if (error.name === "JsonWebTokenError") error = handleInvalidSignature();
+    if (error.name === "TokenExpiredError") error = handleTokenExpiredError();
     sendProductionError(error, req, res);
   }
 };

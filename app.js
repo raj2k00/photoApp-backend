@@ -9,7 +9,6 @@ const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 
 //Importing Routers
-const imageRouter = require("./routes/imageRoutes");
 const userRouter = require("./routes/userRoutes");
 
 //Importing Error Controllers
@@ -62,7 +61,7 @@ app.use(xss());
 app.use(compression());
 //Middleware
 app.use((req, res, next) => {
-  console.log("Hi from the server 😎");
+  console.log("Server hit the request ");
   req.requestTime = new Date().toISOString();
   // console.log(req.cookies);
   // next() is very important! it maintains the flow form one middleware to other
@@ -71,7 +70,6 @@ app.use((req, res, next) => {
 
 // Request Routes for API
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/images", imageRouter);
 
 // Middleware for handling routes that are not yet defined
 app.use("*", (req, res, next) => {

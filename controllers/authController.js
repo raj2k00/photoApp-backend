@@ -1,10 +1,8 @@
 const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
-const { createHmac } = require("crypto");
 const crypto = require("crypto");
 
 const User = require("../models/userModel");
-const Token = require("../models/tokenModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const Email = require("../utils/email");
@@ -49,11 +47,6 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ email: req.body.email });
 
-  let token = await new Token({
-    userId: user._id,
-    token: crypto.randomBytes(32).toString("hex"),
-  }).save();
-
   if (!user)
     return next(new AppError("There is no user with that email address", 404));
 
@@ -65,15 +58,11 @@ exports.signup = catchAsync(async (req, res, next) => {
   console.log("data", data);
   const resetUrl = `${req.protocol}://${req.get(
     "host"
-  )}/users/verifyEmail/${resetToken}`;
-  // console.log(resetUrl);
-  // console.log(user);
+  )}/api/v1/users/verifyEmail/${resetToken}`;
+
   try {
     await new Email(user, resetUrl).sendEmailVerification();
-    res.status(200).json({
-      status: "success",
-      message: "Verification email sent",
-    });
+    createTokenSend(user, 201, res, req);
   } catch (error) {
     this.emailVerificationToken = undefined;
     this.emailVerificationTokenExpires = undefined;
@@ -87,7 +76,6 @@ exports.signup = catchAsync(async (req, res, next) => {
     );
   }
   // console.log(res);
-  // createTokenSend(user, 201, res, req);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -112,33 +100,6 @@ exports.logOut = catchAsync((req, res, next) => {
   res.status(200).json({ status: "success" });
 });
 
-// Only for frontend !
-exports.isLoggedIn = async (req, res, next) => {
-  // Getting cookies from browser
-  if (req.cookies.jwt) {
-    try {
-      // console.log(token);
-      // 2. Token verification
-      const decoded = await promisify(jwt.verify)(
-        req.cookies.jwt,
-        process.env.JWT_SECRET
-      );
-      // 3.Check if the user is active(not deleted by admin)
-      const activeUser = await User.findById(decoded.id);
-      if (!activeUser) {
-        return next();
-      }
-
-      // Passed all conditions response to the pug template with locals variable
-      res.locals.user = activeUser;
-      return next();
-    } catch (err) {
-      return next();
-    }
-  }
-  next();
-};
-
 exports.protect = catchAsync(async (req, res, next) => {
   // 1. Getting token and checking if it is there.
   let token;
@@ -150,57 +111,46 @@ exports.protect = catchAsync(async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
-  // console.log(token);
   if (!token)
     return next(new AppError("Please Log in to access this page", 401));
   // 2. Token verification
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  // 3.Check if the user is active(not deleted by admin)
-  const activeUser = await User.findById(decoded.id);
-  if (!activeUser) {
+  // 3.Check if the user is verified or not
+  const verifiedUser = await User.findById(decoded.id);
+  if (!verifiedUser) {
     return next(new AppError("User is no longer exist", 401));
   }
+
+  if (!verifiedUser.isVerfied) {
+    return next(new AppError("Please verify email", 401));
+  }
   // Passed all conditions proced to next middleware with req.user document
-  res.locals.user = activeUser;
-  req.user = activeUser;
+  res.locals.user = verifiedUser;
+  req.user = verifiedUser;
 
   next();
 });
 
 exports.verifyEmail = catchAsync(async (req, res, next) => {
-  // 1. Get the user token and change it into hash
-  const { token } = req.params;
-
-  const hashedToken = createHmac("sha256", process.env.CRYPTO_SECRET)
-    .update(token)
+  const hashedToken = crypto
+    .createHash("sha256", process.env.CRYPTO_SECRET)
+    .update(req.params.token)
     .digest("hex");
-  // const hashedToken = crypto
-  //   .createHash("sha256", process.env.CRYPTO_SECRET)
-  //   .update(req.params.token)
-  //   .digest("hex");
 
   console.log(hashedToken);
-  // const user = await User.findOne({ emailVerificationToken: token });
+
   const user = await User.findOne({
     emailVerificationToken: hashedToken,
     emailVerificationTokenExpires: { $gt: Date.now() },
   });
 
   console.log(user);
-  // 2. If there is user and token does'nt expire then set new password
+
   if (!user) return next(new AppError("Token is invalid or expired", 400));
   user.isVerfied = true;
   user.emailVerificationToken = undefined;
   user.emailVerificationTokenExpires = undefined;
   await user.save({ validateBeforeSave: false });
 
-  //Optional the below function logs the user when the resetPassword is successfull
-  //Uncomment to make the login funtion use after the resetPassword is Done
-  // 3.A Log the user and send new JWT token
-  // createTokenSend(user, 200, res, req);
-
-  //3.B Send Status and continue with login route
-  res.status(200).json({
-    status: "success",
-  });
+  createTokenSend(user, 200, res, req);
 });

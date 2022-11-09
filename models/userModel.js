@@ -1,9 +1,7 @@
-const { createHmac } = require("crypto");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrpypt = require("bcryptjs");
-const Images = require("./imageModel");
 
 const userSchema = mongoose.Schema(
   {
@@ -21,6 +19,9 @@ const userSchema = mongoose.Schema(
       unique: true,
       lowercase: true,
       validate: [validator.isEmail, "Please provide a valid Email "],
+    },
+    photos: {
+      type: [String],
     },
     phoneNumber: {
       type: String,
@@ -45,14 +46,6 @@ const userSchema = mongoose.Schema(
   }
 );
 
-// // VIRTUAL PROPERTY NOT VISIBLE OUTSIDE (BUSINESSS LOGIC)
-
-userSchema.virtual("images", {
-  ref: Images,
-  localField: "_id",
-  foreignField: "owner",
-});
-
 userSchema.pre("save", async function (next) {
   // Only this function works when the password is modified
   if (!this.isModified("password")) return next();
@@ -72,15 +65,10 @@ userSchema.methods.checkPassword = async function (
 userSchema.methods.createEmailVerificationToken = function () {
   const resetToken = crypto.randomBytes(32).toString("hex");
 
-  const hashedToken = createHmac("sha256", process.env.CRYPTO_SECRET)
+  this.emailVerificationToken = crypto
+    .createHash("sha256", process.env.CRYPTO_SECRET)
     .update(resetToken)
     .digest("hex");
-  // this.emailVerificationToken = crypto
-  //   .createHash("sha256", process.env.CRYPTO_SECRET)
-  //   .update(resetToken)
-  //   .digest("hex");
-
-  this.emailVerificationToken = hashedToken;
 
   this.emailVerificationTokenExpires = Date.now() + 30 * 60 * 1000; // Expire-Time 30 minutes after issuing
 
