@@ -75,7 +75,6 @@ exports.signup = catchAsync(async (req, res, next) => {
       )
     );
   }
-  // console.log(res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
