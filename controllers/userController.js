@@ -69,9 +69,13 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
 });
 
 exports.updateUser = catchAsync(async (req, res, next) => {
-  const Doc = await User.findByIdAndUpdate(req.user.id, {
-    $push: { photos: req.body.photos },
-  });
+  const Doc = await User.findByIdAndUpdate(
+    req.user.id,
+    {
+      $push: { photos: req.body.photos },
+    },
+    { new: true }
+  );
   if (!Doc) {
     return next(new AppError("No Documents were found with that ID", 404));
   }

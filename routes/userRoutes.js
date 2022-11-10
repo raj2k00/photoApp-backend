@@ -7,6 +7,7 @@ const {
   resizeUploadImages,
   updateUser,
   deletePhotos,
+  getUser,
 } = require("../controllers/userController");
 
 const {
@@ -19,6 +20,7 @@ const {
 router.post("/signup", signup);
 router.post("/login", login);
 router.patch("/verifyEmail/:token", verifyEmail);
+router.route("/getUser").get(protect, getUser);
 
 router
   .route("/upload")
