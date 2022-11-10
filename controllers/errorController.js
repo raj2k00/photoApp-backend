@@ -6,7 +6,7 @@ const handleCastErrorDB = (err) => {
 };
 
 const handleDublicateFieldsDB = (err) => {
-  const message = `Image with name - ${err.keyValue.name} - already exists`;
+  const message = `Document with name - ${err.keyValue.name} - already exists`;
   return new AppError(message, 400);
 };
 const handleValidatonFieldDB = (err) => {

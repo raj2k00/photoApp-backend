@@ -13,7 +13,7 @@ module.exports = class Email {
   }
 
   newTransport() {
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === "development") {
       return nodemailer.createTransport({
         service: "hotmail",
         auth: {

@@ -15,7 +15,7 @@ mongoose
   })
   .then(() => console.log("Connected to Cloud Database"));
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
 const server = app.listen(port, () => {
   console.log(`server started on port ${port}...`);
