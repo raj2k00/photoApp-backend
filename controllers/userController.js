@@ -30,9 +30,9 @@ exports.resizeUploadImages = catchAsync(async (req, res, next) => {
   await Promise.all(
     req.files.map(async (file, index) => {
       const extention = file.mimetype.split("/")[1];
-      const filename = `${file.originalname.split(".")[0]}-${
-        req.user.id
-      }-${Date.now()}-${index + 1}.${extention}`;
+      const filename = `${
+        file.originalname.replaceAll(" ", "").split(".")[0]
+      }-${req.user.id}-${Date.now()}-${index + 1}.${extention}`;
 
       Jimp.read(file.buffer, async (err, image) => {
         if (err)
