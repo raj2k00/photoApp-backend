@@ -98,8 +98,7 @@ exports.createOne = catchAsync(async (req, res, next) => {
 });
 
 exports.getUser = catchAsync(async (req, res, next) => {
-  // console.log(req.params.id);
-  const query = User.findById({ _id: req.params.id });
+  const query = User.findById({ _id: req.user.id });
   const doc = await query;
 
   if (!doc) {
@@ -135,6 +134,7 @@ exports.deletePhotos = catchAsync(async (req, res, next) => {
   if (!Doc) {
     return next(new AppError("No Photos were found with that ID", 404));
   }
+
   res.status(204).json({
     status: "success",
     data: {
