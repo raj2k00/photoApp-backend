@@ -23,6 +23,7 @@ app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 //Impelementing CORS policy
 //This will also cross origin resourse sharing for simple requests like
