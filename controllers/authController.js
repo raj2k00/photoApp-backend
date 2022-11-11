@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const crypto = require("crypto");
+const path = require("path");
 
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
@@ -152,5 +153,10 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
   user.emailVerificationTokenExpires = undefined;
   await user.save({ validateBeforeSave: false });
 
-  createTokenSend(user, 200, res, req);
+  res.sendFile(path.join(__dirname, "../views/successPage.pug"), (err) => {
+    if (err) {
+      console.log(err);
+      return next(new AppError("can't send success page", 401));
+    }
+  });
 });
