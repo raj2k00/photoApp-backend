@@ -20,7 +20,7 @@ const {
 
 router.post("/signup", signup);
 router.post("/login", login);
-router.patch("/verifyEmail/:token", verifyEmail);
+router.get("/verifyEmail/:token", verifyEmail);
 router.route("/getUser").get(protect, getUser);
 
 router
