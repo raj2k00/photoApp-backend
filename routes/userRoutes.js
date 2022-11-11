@@ -7,6 +7,7 @@ const {
   resizeUploadImages,
   updateUser,
   deletePhotos,
+  uploadBase64Image,
   getUser,
 } = require("../controllers/userController");
 
@@ -25,6 +26,8 @@ router.route("/getUser").get(protect, getUser);
 router
   .route("/upload")
   .post(protect, uploadImages, resizeUploadImages, updateUser);
+
+router.route("/uploadbase64").post(protect, uploadBase64Image, updateUser);
 
 router.route("/deletePhotos").patch(protect, deletePhotos);
 

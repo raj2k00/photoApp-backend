@@ -65,11 +65,12 @@ userSchema.methods.checkPassword = async function (
 
 userSchema.methods.createEmailVerificationToken = function () {
   const resetToken = crypto.randomBytes(32).toString("hex");
-
-  this.emailVerificationToken = crypto
-    .createHash("sha256", process.env.CRYPTO_SECRET)
-    .update(resetToken)
-    .digest("hex");
+  this.emailVerificationToken = resetToken;
+  // this.emailVerificationToken = crypto
+  //   .createHash("sha256")
+  //   .update("¥")
+  //   .update(resetToken)
+  //   .digest("hex");
 
   this.emailVerificationTokenExpires = Date.now() + 30 * 60 * 1000; // Expire-Time 30 minutes after issuing
 

@@ -130,15 +130,17 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 
 exports.verifyEmail = catchAsync(async (req, res, next) => {
-  const hashedToken = crypto
-    .createHash("sha256", process.env.CRYPTO_SECRET)
-    .update(req.params.token)
-    .digest("hex");
+  // console.log(req.params.token);
+  // const hashedToken = crypto
+  //   .createHash("sha256")
+  //   .update("¥")
+  //   .update(req.params.token)
+  //   .digest("hex");
 
   // console.log(hashedToken);
 
   const user = await User.findOne({
-    emailVerificationToken: hashedToken,
+    emailVerificationToken: req.params.token,
     emailVerificationTokenExpires: { $gt: Date.now() },
   });
 

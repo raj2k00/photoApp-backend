@@ -1,3 +1,4 @@
+const fs = require("fs");
 const multer = require("multer");
 const Jimp = require("jimp");
 const User = require("../models/userModel");
@@ -7,6 +8,7 @@ const AppError = require("../utils/appError");
 const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
+  console.log(file);
   if (file.mimetype.startsWith("image")) {
     cb(null, true);
   } else {
@@ -21,8 +23,36 @@ const upload = multer({
 
 exports.uploadImages = upload.array("photos", 20);
 
+exports.uploadBase64Image = catchAsync(async (req, res, next) => {
+  req.body.photos = [];
+  await Promise.all(
+    req.body.images.map((file, index) => {
+      const imageData = file.url.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+      const response = {};
+      if (imageData.length !== 3) {
+        return next(new AppError("Invalid Image", 404));
+      }
+      response.type = imageData[1];
+      response.data = Buffer.from(imageData[2], "base64");
+      const decodedImg = response;
+      const imageBuffer = decodedImg.data;
+      const { type } = decodedImg;
+      const extension = type.split("/")[1];
+      const fileName = `${
+        file.name.replaceAll(" ", "").split(".")[0]
+      }.${extension}`;
+      try {
+        fs.writeFileSync(`public/images/${fileName}`, imageBuffer, "utf8");
+        req.body.photos.push(fileName);
+      } catch (e) {
+        next(e);
+      }
+    })
+  );
+  next();
+});
+
 exports.resizeUploadImages = catchAsync(async (req, res, next) => {
-  // console.log(req.files);
   if (!req.files) return next();
 
   req.body.photos = [];

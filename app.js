@@ -49,8 +49,8 @@ const limiter = rateLimit({
 
 app.use("/api", limiter);
 //Setting Body Paser in Express
-app.use(express.json({ limit: "10kb" }));
-app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 app.use(cookieParser());
 // to prevent against NoSQL query injection
