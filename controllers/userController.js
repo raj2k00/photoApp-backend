@@ -24,6 +24,7 @@ const upload = multer({
 exports.uploadImages = upload.array("photos", 20);
 
 exports.uploadBase64Image = catchAsync(async (req, res, next) => {
+  console.log(req.body.images);
   req.body.photos = [];
   await Promise.all(
     req.body.images.map((file, index) => {
