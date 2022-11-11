@@ -145,18 +145,19 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
     emailVerificationTokenExpires: { $gt: Date.now() },
   });
 
-  // console.log(user);
+  if (!user) {
+    return next(new AppError("Token is invalid or expired", 400));
+  }
 
-  if (!user) return next(new AppError("Token is invalid or expired", 400));
   user.isVerfied = true;
   user.emailVerificationToken = undefined;
   user.emailVerificationTokenExpires = undefined;
   await user.save({ validateBeforeSave: false });
 
-  res.sendFile(path.join(__dirname, "../views/successPage.pug"), (err) => {
+  res.sendFile(path.join(__dirname, "../views/successPage.html"), (err) => {
     if (err) {
       console.log(err);
-      return next(new AppError("can't send success page", 401));
+      return next(new AppError("Can't send success page", 401));
     }
   });
 });
